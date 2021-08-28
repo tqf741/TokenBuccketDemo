@@ -67,8 +67,7 @@ public class TokenBucketImpl implements TokenBucket {
         long oldStartTime = nextStartTime;
         double canAcquireTokenNum = Math.min(tokenNum, this.curToken);
         double tokenStillNeed = tokenNum - canAcquireTokenNum;
-        double spendAcquireToken = canAcquireTokenNum < rate ? 0 : (canAcquireTokenNum / rate);
-        long waitTime = (long) ((spendAcquireToken + (tokenStillNeed / rate)) * 1000);
+        long waitTime = (long) (((tokenStillNeed / rate)) * 1000);
         this.nextStartTime = this.nextStartTime + waitTime;
         this.curToken -= canAcquireTokenNum;
         return oldStartTime;
