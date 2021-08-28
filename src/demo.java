@@ -24,49 +24,37 @@ public class demo {
     public static void main(String[] args) {
         TokenBucketImpl bucket = new TokenBucketImpl(2, 4);
         ThreadPoolExecutor threadPool = new ThreadPoolExecutor(3, 8, 1000, TimeUnit.MILLISECONDS, new SynchronousQueue<Runnable>(), Executors.defaultThreadFactory(), new ThreadPoolExecutor.AbortPolicy());
-        Runnable t1 = new Runnable() {
-            @Override
-            public void run() {
-                long sleepTime = bucket.acquire(3, System.currentTimeMillis());
-                try {
-                    Thread.sleep(sleepTime);
-                    pritTime(1);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        };
 
-        Runnable t2 = new Runnable() {
-            @Override
-            public void run() {
-                long sleepTime = bucket.acquire(1, System.currentTimeMillis());
-                try {
-                    Thread.sleep(sleepTime);
-                    pritTime(2);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        };
-
-        Runnable t3 = new Runnable() {
-            @Override
-            public void run() {
-                long sleepTime = bucket.acquire(2, System.currentTimeMillis());
-                try {
-                    Thread.sleep(sleepTime);
-                    pritTime(3);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        };
+        Runnable t1 = buildRequestThread(1, 3, bucket);
+        Runnable t2 = buildRequestThread(2, 1, bucket);
+        Runnable t3 = buildRequestThread(3, 2, bucket);
 
         threadPool.execute(t1);
         threadPool.execute(t2);
         threadPool.execute(t3);
         threadPool.shutdown();
+    }
+
+    /**
+     *
+     * @param flag      当前线程的标志
+     * @param tokenNum  当前线程需要多少个token
+     * @param bucket    令牌桶
+     * @return
+     */
+    public static Runnable buildRequestThread (int flag, int tokenNum, TokenBucket bucket) {
+        return new Runnable() {
+            @Override
+            public void run() {
+                long sleepTime = bucket.acquire(tokenNum, System.currentTimeMillis());
+                try {
+                    Thread.sleep(sleepTime);
+                    pritTime(flag);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
     }
 
     public static void pritTime(int num) {
